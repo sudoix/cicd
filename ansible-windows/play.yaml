@@ -1,0 +1,25 @@
+- hosts: win
+  tasks:
+    - name: Ensure a directory exists
+      win_file:
+        path: C:\example\directory
+        state: directory
+
+    - name: Copy a folder recursively 
+      win_copy:
+        src: code
+        dest: C:\example\directory
+
+    - name: Copy a folder recursively where the source is on the remote host
+      win_copy:
+        src: C:\example\directory
+        dest: C:\ansible
+        remote_src: true
+
+    - name: Copy PowerShell script to Windows server
+      win_copy:
+        src: create_files.ps1
+        dest: C:\ansible\create_files.ps1
+
+    - name: Execute PowerShell script
+      win_shell: powershell.exe -ExecutionPolicy Bypass C:\ansible\create_files.ps1
