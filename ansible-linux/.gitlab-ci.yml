@@ -1,0 +1,72 @@
+image: docker
+
+
+
+stages:
+  # - build-pizza
+  - deploy-pizza
+  # - build-prod
+  - deploy-prod
+
+# build-pizza:
+#   stage: build-pizza
+#   before_script:
+#     - docker login $REPO_HOST -u $REPO_USR -p $REPO_PWD
+#   script:
+#     - docker build -t $REPO_HOST/lab/logricher:${CI_PIPELINE_ID} .
+#     - docker push $REPO_HOST/lab/logricher:${CI_PIPELINE_ID}
+#   only:
+#     - dev
+
+deploy-pizza:
+  stage: deploy-pizza
+  image: 9350733512/ansible:0.0.2
+  variables:
+    ANSIBLE_HOST_KEY_CHECKING: 'false'
+    ANSIBLE_FORCE_COLOR: 'true'
+  before_script:
+    - mkdir -p ~/.ssh
+    - echo "$DEPLOYER_PRIVATE_KEY" >> ~/.ssh/id_rsa
+    - chmod 600  ~/.ssh/id_rsa
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - ls
+    - pwd
+  script:
+    - cd ansible && ansible-playbook -i inventory/servers-dev.ini deploy.yml --become --become-method=sudo #-vvv
+  only:
+    - dev
+
+
+# build-prod:
+#   stage: build-prod
+#   before_script:
+#     - docker login $REPO_HOST -u $REPO_USR -p $REPO_PWD
+#   script:
+#     - docker build -t $REPO_HOST/prod/logricher:${CI_COMMIT_TAG} . 
+#     - docker push $REPO_HOST/prod/logricher:${CI_COMMIT_TAG}
+#   only:
+#     - main
+#   only:
+#     - tags
+
+deploy-prod:
+  stage: deploy-prod
+  image: 9350733512/ansible:0.0.2
+  variables:
+    ANSIBLE_HOST_KEY_CHECKING: 'false'
+    ANSIBLE_FORCE_COLOR: 'true'
+  before_script:
+    - mkdir -p ~/.ssh
+    - echo "$DEPLOYER_PRIVATE_KEY" >> ~/.ssh/id_rsa
+    - chmod 600  ~/.ssh/id_rsa
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+    - ls
+    - pwd
+  script:
+    - cd ansible && ansible-playbook -i inventory/servers-dev.ini deploy.yml --become --become-method=sudo #-vvv
+  only:
+    - tags
+  when: manual
+
+
+
