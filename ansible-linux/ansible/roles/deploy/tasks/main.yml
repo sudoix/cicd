@@ -1,0 +1,20 @@
+---
+- name: Create Directory
+  ansible.builtin.file:
+    path: /opt/source_code
+    state: directory
+    mode: '0755'
+
+- name: Print "{{ playbook_dir }}"
+  debug:
+    msg: The directory is "{{ playbook_dir }}" 
+
+- name: Synchronize entire repository to remote
+  ansible.posix.synchronize:
+    src: /builds/milad/test
+    dest: /opt/source_code
+    delete: true
+
+- name: Runn buld_script.sh on server
+  shell:
+    cmd: bash /opt/source_code/test/buld_script.sh
